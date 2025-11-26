@@ -3,147 +3,298 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinTube Music</title>
+<title>WinTube Home</title>
 <style>
+  /* Frutiger-style font */
   body {
-    font-family: "Segoe UI", "Frutiger", Arial, sans-serif;
-    background: linear-gradient(135deg, #a8edea, #fed6e3);
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    font-family: "Segoe UI", "Frutiger", Arial, sans-serif;
+    background-image: url('https://i.imgur.com/JlXhxvD.jpeg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
-  header {
+
+  /* Now Playing Top Bar */
+  #nowPlayingBar {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: center;
-    padding: 20px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.3);
     backdrop-filter: blur(10px);
-    font-size: 2em;
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    gap: 15px;
+    z-index: 1000;
+  }
+  #nowPlayingInfo {
+    flex: 1;
     font-weight: bold;
   }
-  #search-container {
-    margin: 20px;
-    width: 90%;
-    max-width: 600px;
-    display: flex;
-    gap: 10px;
+  #progressBar {
+    width: 200px;
   }
-  #search-container input {
-    flex: 1;
-    padding: 10px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-  #search-container button {
-    padding: 10px 20px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: none;
+  #playPauseBtn {
+    padding: 6px 12px;
     background: #4e9af1;
-    color: white;
-    cursor: pointer;
-  }
-  #results {
-    width: 90%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  .song {
-    display: flex;
-    align-items: center;
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(8px);
-    padding: 10px;
-    border-radius: 10px;
-  }
-  .song img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    margin-right: 15px;
-  }
-  .song-info {
-    flex: 1;
-  }
-  .song-info h3 {
-    margin: 0;
-    font-size: 1.1em;
-  }
-  .song-info p {
-    margin: 2px 0 0 0;
-    font-size: 0.9em;
-    color: #333;
-  }
-  .play-btn {
-    padding: 8px 12px;
-    background: #ff6b81;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
   }
+
+  /* Push page content down to avoid overlap */
+  .page-content {
+    margin-top: 60px;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    background: linear-gradient(to bottom, #00129B 0%, #000A61 70%);
+    display: flex;
+    align-items: center;
+    padding: 15px 30px;
+    height: 80px;
+    box-shadow: 0 4px 0 #00129B inset, 0 4px 4px rgba(0,0,0,0.3);
+    border-bottom: 3px solid #00129B;
+  }
+  .top-bar img {
+    height: 60px;
+    margin-right: 30px;
+    border: 3px solid white;
+    background-color: #000A61;
+    padding: 2px;
+  }
+  .top-bar h1 {
+    flex: 1;
+    text-align: center;
+    color: #ffffff;
+    font-weight: bold;
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 #00129B;
+  }
+
+  /* Info Boxes */
+  .info-box {
+    width: 90%;
+    max-width: 900px;
+    margin: 40px auto;
+    border: 2px solid #000A61;
+    box-shadow: 2px 2px 0 #00129B;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+  }
+  .info-title {
+    background-color: #000A61;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 22px;
+    padding: 10px 15px;
+    text-shadow: 1px 1px 0 #00129B;
+  }
+  .info-text {
+    padding: 15px;
+    font-size: 16px;
+    color: #111111;
+    line-height: 1.5;
+  }
+  .info-text a {
+    color: #00129B;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+  .info-text ul {
+    padding-left: 20px;
+  }
+  .info-text li {
+    margin-bottom: 8px;
+  }
+  .info-text button {
+    display: block;
+    margin: 20px auto 0 auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .info-text button:hover {
+    background-color: #2980b9;
+  }
+
+  /* Footer Text */
+  .footer-text {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #ffffff;
+    margin: 40px 0 20px 0;
+    text-shadow: 1px 1px 0 #000A61;
+  }
+
+  /* Music Search Box */
+  .music-box {
+    width: 90%;
+    max-width: 900px;
+    margin: 40px auto;
+    border: 2px solid #000A61;
+    box-shadow: 2px 2px 0 #00129B;
+    background-color: rgba(255,255,255,0.95);
+    padding: 15px;
+  }
+  .music-box input {
+    width: 70%;
+    padding: 8px;
+    margin-right: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  .music-box button {
+    padding: 8px 14px;
+    background-color: #4e9af1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .song-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 6px;
+  }
+  .song-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+  }
+  .song-item button {
+    margin-left: auto;
+    background-color: #ff6b81;
+  }
 </style>
 </head>
 <body>
 
-<header>WinTube Music</header>
-
-<div id="search-container">
-  <input type="text" id="searchInput" placeholder="Search for an artist or song...">
-  <button onclick="searchMusic()">Search</button>
+<!-- Now Playing Bar -->
+<div id="nowPlayingBar">
+  <div id="nowPlayingInfo">No song playing</div>
+  <input type="range" id="progressBar" value="0" min="0" max="100">
+  <button id="playPauseBtn">Play</button>
 </div>
 
-<div id="results"></div>
+<div class="page-content">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <img src="https://i.imgur.com/Osi9wYB.png" alt="WinTube Logo">
+    <h1>Welcome To WinTube!</h1>
+  </div>
+
+  <!-- Existing Info Boxes -->
+  <div class="info-box">
+    <div class="info-title">What is WinTube?</div>
+    <div class="info-text">
+      WinTube is a video player designed for the Windows Animation Community (WAC). It uses YouTube embeds...
+    </div>
+  </div>
+
+  <!-- Music Box -->
+  <div class="music-box">
+    <input type="text" id="musicSearch" placeholder="Search for an artist or song...">
+    <button onclick="searchMusic()">Search</button>
+    <div id="musicResults"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-text">
+    This project, made by Windows Aqua, is an OP project. The creation of this website is not for profit but to help WAC become better for greater things. The website is not monetized at all.
+  </div>
+
+</div>
 
 <script>
 let currentAudio = null;
+let progressInterval = null;
 
 function searchMusic() {
-  const query = document.getElementById('searchInput').value.trim();
+  const query = document.getElementById('musicSearch').value.trim();
   if (!query) return alert("Enter an artist or song name");
 
-  fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`)
-    .then(response => response.json())
-    .then(data => displayResults(data.results))
-    .catch(err => console.error("API error:", err));
+  fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`)
+    .then(res => res.json())
+    .then(data => displayMusic(data.results))
+    .catch(err => console.error(err));
 }
 
-function displayResults(songs) {
-  const results = document.getElementById('results');
-  results.innerHTML = "";
-  if (!songs.length) {
-    results.innerHTML = "<p>No songs found.</p>";
-    return;
-  }
+function displayMusic(songs) {
+  const container = document.getElementById('musicResults');
+  container.innerHTML = "";
+  if (!songs.length) container.innerHTML = "<p>No songs found.</p>";
 
   songs.forEach(song => {
     const div = document.createElement('div');
-    div.className = 'song';
+    div.className = 'song-item';
     div.innerHTML = `
       <img src="${song.artworkUrl100}" alt="Artwork">
-      <div class="song-info">
-        <h3>${song.trackName}</h3>
-        <p>${song.artistName}</p>
-      </div>
-      <button class="play-btn">Play</button>
+      <div>${song.trackName} - ${song.artistName}</div>
+      <button>Play</button>
     `;
-    const playBtn = div.querySelector('.play-btn');
-    playBtn.addEventListener('click', () => {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-      }
-      currentAudio = new Audio(song.previewUrl);
-      currentAudio.play();
-    });
-    results.appendChild(div);
+    const btn = div.querySelector('button');
+    btn.onclick = () => playSong(song);
+    container.appendChild(div);
   });
 }
+
+const nowPlayingTitle = document.getElementById('nowPlayingInfo');
+const progressBar = document.getElementById('progressBar');
+const playPauseBtn = document.getElementById('playPauseBtn');
+
+function playSong(song) {
+  if (currentAudio) {
+    currentAudio.pause();
+    clearInterval(progressInterval);
+  }
+  currentAudio = new Audio(song.previewUrl);
+  currentAudio.play();
+  nowPlayingTitle.textContent = `${song.trackName} - ${song.artistName}`;
+  playPauseBtn.textContent = 'Pause';
+  progressBar.value = 0;
+
+  progressInterval = setInterval(() => {
+    if (currentAudio && currentAudio.duration) {
+      progressBar.value = (currentAudio.currentTime / currentAudio.duration) * 100;
+    }
+  }, 500);
+
+  currentAudio.addEventListener('ended', () => {
+    nowPlayingTitle.textContent = 'No song playing';
+    progressBar.value = 0;
+    playPauseBtn.textContent = 'Play';
+    clearInterval(progressInterval);
+    currentAudio = null;
+  });
+}
+
+playPauseBtn.addEventListener('click', () => {
+  if (!currentAudio) return;
+  if (currentAudio.paused) {
+    currentAudio.play();
+    playPauseBtn.textContent = 'Pause';
+  } else {
+    currentAudio.pause();
+    playPauseBtn.textContent = 'Play';
+  }
+});
 </script>
 
 </body>
