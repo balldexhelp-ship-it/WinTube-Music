@@ -11,19 +11,16 @@ body {
   background: #121212;
   color: #fff;
 }
-
 .page-content {
   max-width: 900px;
-  margin: 100px auto 50px;
+  margin: 50px auto 150px;
   padding: 20px;
 }
-
 .music-box {
   background: #1e1e1e;
   padding: 20px;
   border-radius: 12px;
 }
-
 .music-box input {
   width: 70%;
   padding: 10px;
@@ -31,7 +28,6 @@ body {
   border-radius: 6px;
   border: none;
 }
-
 .music-box button {
   padding: 10px 16px;
   border-radius: 6px;
@@ -40,11 +36,9 @@ body {
   color: white;
   cursor: pointer;
 }
-
 #musicResults {
   margin-top: 20px;
 }
-
 .song-item {
   display: flex;
   align-items: center;
@@ -56,21 +50,17 @@ body {
   cursor: pointer;
   transition: background 0.2s;
 }
-
 .song-item:hover {
   background: #333;
 }
-
 .song-item img {
   width: 60px;
   height: 60px;
   border-radius: 6px;
 }
-
 .song-info {
   flex: 1;
 }
-
 #nowPlayingBar {
   position: fixed;
   bottom: 0;
@@ -82,23 +72,20 @@ body {
   gap: 15px;
   padding: 10px 20px;
   border-top: 1px solid #333;
+  z-index: 1000;
 }
-
 #nowPlayingBar img {
   width: 60px;
   height: 60px;
   border-radius: 6px;
 }
-
 #nowPlayingInfo {
   flex: 1;
   font-weight: bold;
 }
-
 #progressBar {
   width: 200px;
 }
-
 #playPauseBtn {
   padding: 6px 12px;
   background: #1db954;
@@ -106,6 +93,30 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+#recommended {
+  margin-top: 40px;
+}
+#recommended h2 {
+  margin-bottom: 15px;
+}
+.reco-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.reco-item {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  width: calc(33% - 10px);
+  cursor: pointer;
+  text-align: center;
+}
+.reco-item img {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 5px;
 }
 </style>
 </head>
@@ -116,6 +127,11 @@ body {
     <input type="text" id="musicSearch" placeholder="Search iTunes...">
     <button onclick="searchMusic()">Search</button>
     <div id="musicResults"></div>
+  </div>
+
+  <div id="recommended">
+    <h2>Discover New Music</h2>
+    <div class="reco-row" id="recoRow"></div>
   </div>
 </div>
 
@@ -128,11 +144,13 @@ body {
 
 <script>
 let currentAudio = null, progressInterval = null;
-
 const nowPlayingTitle = document.getElementById('nowPlayingInfo');
 const nowPlayingArt = document.getElementById('nowPlayingArt');
 const progressBar = document.getElementById('progressBar');
 const playPauseBtn = document.getElementById('playPauseBtn');
+
+// Predefined search terms for recommended music
+const recoTerms = ["pop", "rock", "jazz", "hip hop", "classical", "edm", "blues", "indie"];
 
 function searchMusic() {
   const query = document.getElementById('musicSearch').value.trim();
@@ -196,6 +214,30 @@ playPauseBtn.addEventListener('click',()=>{
     }
   }
 });
+
+// Populate recommended music on page load
+function loadRecommended() {
+  const row = document.getElementById('recoRow');
+  row.innerHTML = "";
+  // Pick 3 random terms for variety
+  const randomTerms = recoTerms.sort(() => 0.5 - Math.random()).slice(0,3);
+  randomTerms.forEach(term => {
+    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=3`)
+      .then(res => res.json())
+      .then(data => {
+        data.results.forEach(song => {
+          const div = document.createElement('div');
+          div.className = 'reco-item';
+          div.innerHTML = `<img src="${song.artworkUrl100}"><div>${song.trackName}</div><div style="font-size:12px;color:#ccc">${song.artistName}</div>`;
+          div.onclick = () => playSong(song);
+          row.appendChild(div);
+        });
+      });
+  });
+}
+
+// Load recommended music when page loads
+window.onload = loadRecommended;
 </script>
 </body>
 </html>
