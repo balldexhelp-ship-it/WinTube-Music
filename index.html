@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>WinTube Music - Spotify Style</title>
+<title>WinTube Music - YouTube List</title>
 <style>
 body {
   margin: 0;
@@ -16,50 +16,27 @@ body {
   margin: 50px auto 150px;
   padding: 20px;
 }
-.music-box {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 12px;
-}
-.music-box input {
-  width: 70%;
-  padding: 10px;
-  margin-right: 10px;
-  border-radius: 6px;
-  border: none;
-}
-.music-box button {
-  padding: 10px 16px;
-  border-radius: 6px;
-  border: none;
-  background: #1db954;
-  color: white;
-  cursor: pointer;
-}
-#musicResults {
-  margin-top: 20px;
-}
-.song-item {
+#videoList {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 15px;
+}
+.video-item {
+  background: #1e1e1e;
   padding: 10px;
   border-radius: 8px;
-  background: #2a2a2a;
-  margin-bottom: 10px;
+  width: calc(33% - 10px);
   cursor: pointer;
+  text-align: center;
   transition: background 0.2s;
 }
-.song-item:hover {
+.video-item:hover {
   background: #333;
 }
-.song-item img {
-  width: 60px;
-  height: 60px;
+.video-item img {
+  width: 100%;
   border-radius: 6px;
-}
-.song-info {
-  flex: 1;
+  margin-bottom: 5px;
 }
 #nowPlayingBar {
   position: fixed;
@@ -83,161 +60,76 @@ body {
   flex: 1;
   font-weight: bold;
 }
-#progressBar {
-  width: 200px;
-}
-#playPauseBtn {
-  padding: 6px 12px;
-  background: #1db954;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#recommended {
-  margin-top: 40px;
-}
-#recommended h2 {
-  margin-bottom: 15px;
-}
-.reco-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.reco-item {
-  background: #2a2a2a;
-  padding: 10px;
+#youtubePlayer {
+  display: block;
   border-radius: 8px;
-  width: calc(33% - 10px);
-  cursor: pointer;
-  text-align: center;
-}
-.reco-item img {
   width: 100%;
-  border-radius: 6px;
-  margin-bottom: 5px;
+  max-width: 900px;
+  aspect-ratio: 16/9;
+  margin-top: 20px;
 }
 </style>
 </head>
 <body>
 
 <div class="page-content">
-  <div class="music-box">
-    <input type="text" id="musicSearch" placeholder="Search iTunes...">
-    <button onclick="searchMusic()">Search</button>
-    <div id="musicResults"></div>
-  </div>
-
-  <div id="recommended">
-    <h2>Discover New Music</h2>
-    <div class="reco-row" id="recoRow"></div>
-  </div>
+  <div id="videoList"></div>
+  <iframe id="youtubePlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
 <div id="nowPlayingBar">
   <img id="nowPlayingArt" src="" alt="" style="display:none;">
   <div id="nowPlayingInfo">No song playing</div>
-  <input type="range" id="progressBar" value="0" min="0" max="100">
-  <button id="playPauseBtn">Play</button>
 </div>
 
 <script>
-let currentAudio = null, progressInterval = null;
+// List of YouTube videos
+const videos = [
+  "hfJnx0my1B0",
+  "Ml_eZPDEEms",
+  "psKV_D6Tunk",
+  "-85yab-4syM",
+  "gzrlrvxKf-U",
+  "Xq3XBwu5v_E",
+  "yMYTG4C-JnA",
+  "RRGWDQORf-w",
+  "WShUujfh27Y",
+  "PnVx7XH8GOk",
+  "SID_ikfX8QI"
+];
+
+const videoTitles = [
+  "Video 1", "Video 2", "Video 3", "Video 4", "Video 5",
+  "Video 6", "Video 7", "Video 8", "Video 9", "Video 10",
+  "Video 11"
+];
+
+const videoThumbnails = videos.map(id => `https://img.youtube.com/vi/${id}/hqdefault.jpg`);
+
+const videoList = document.getElementById('videoList');
+const youtubePlayer = document.getElementById('youtubePlayer');
 const nowPlayingTitle = document.getElementById('nowPlayingInfo');
 const nowPlayingArt = document.getElementById('nowPlayingArt');
-const progressBar = document.getElementById('progressBar');
-const playPauseBtn = document.getElementById('playPauseBtn');
 
-// Predefined search terms for recommended music
-const recoTerms = ["pop", "rock", "jazz", "hip hop", "classical", "edm", "blues", "indie"];
-
-function searchMusic() {
-  const query = document.getElementById('musicSearch').value.trim();
-  if (!query) return alert("Enter a song or artist");
-  fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`)
-    .then(res => res.json())
-    .then(data => displayMusic(data.results))
-    .catch(err => console.error(err));
-}
-
-function displayMusic(songs) {
-  const container = document.getElementById('musicResults');
-  container.innerHTML = "";
-  if (!songs.length) return container.innerHTML = "<p>No songs found.</p>";
-  songs.forEach(song => {
-    const div = document.createElement('div');
-    div.className = 'song-item';
-    div.innerHTML = `
-      <img src="${song.artworkUrl100}">
-      <div class="song-info">${song.trackName} - ${song.artistName}</div>
-    `;
-    div.onclick = () => playSong(song);
-    container.appendChild(div);
-  });
-}
-
-function playSong(song) {
-  if(currentAudio){ currentAudio.pause(); clearInterval(progressInterval); }
-  currentAudio = new Audio(song.previewUrl);
-  currentAudio.play();
-  nowPlayingTitle.textContent = `${song.trackName} - ${song.artistName}`;
-  nowPlayingArt.src = song.artworkUrl100;
-  nowPlayingArt.style.display = 'block';
-  playPauseBtn.textContent = 'Pause';
-  progressBar.value = 0;
-
-  progressInterval = setInterval(() => {
-    if(currentAudio && currentAudio.duration){
-      progressBar.value = (currentAudio.currentTime / currentAudio.duration) * 100;
-    }
-  }, 500);
-
-  currentAudio.onended = () => {
-    nowPlayingTitle.textContent = 'No song playing';
-    nowPlayingArt.style.display = 'none';
-    progressBar.value = 0;
-    playPauseBtn.textContent = 'Play';
-    clearInterval(progressInterval);
-    currentAudio = null;
-  };
-}
-
-playPauseBtn.addEventListener('click',()=>{
-  if(currentAudio){
-    if(currentAudio.paused){
-      currentAudio.play();
-      playPauseBtn.textContent='Pause';
-    } else {
-      currentAudio.pause();
-      playPauseBtn.textContent='Play';
-    }
-  }
+// Create video items
+videos.forEach((id, index) => {
+  const div = document.createElement('div');
+  div.className = 'video-item';
+  div.innerHTML = `
+    <img src="${videoThumbnails[index]}">
+    <div>${videoTitles[index]}</div>
+  `;
+  div.onclick = () => playVideo(id, videoThumbnails[index], videoTitles[index]);
+  videoList.appendChild(div);
 });
 
-// Populate recommended music on page load
-function loadRecommended() {
-  const row = document.getElementById('recoRow');
-  row.innerHTML = "";
-  // Pick 3 random terms for variety
-  const randomTerms = recoTerms.sort(() => 0.5 - Math.random()).slice(0,3);
-  randomTerms.forEach(term => {
-    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=3`)
-      .then(res => res.json())
-      .then(data => {
-        data.results.forEach(song => {
-          const div = document.createElement('div');
-          div.className = 'reco-item';
-          div.innerHTML = `<img src="${song.artworkUrl100}"><div>${song.trackName}</div><div style="font-size:12px;color:#ccc">${song.artistName}</div>`;
-          div.onclick = () => playSong(song);
-          row.appendChild(div);
-        });
-      });
-  });
+function playVideo(id, thumbnail, title) {
+  youtubePlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  nowPlayingTitle.textContent = title;
+  nowPlayingArt.src = thumbnail;
+  nowPlayingArt.style.display = 'block';
 }
-
-// Load recommended music when page loads
-window.onload = loadRecommended;
 </script>
+
 </body>
 </html>
