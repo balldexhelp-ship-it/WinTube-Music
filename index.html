@@ -1,145 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>WinTube Music — Playlist</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #121212;
-      color: #fff;
-    }
-    .page-content {
-      max-width: 900px;
-      margin: 50px auto 150px;
-      padding: 20px;
-    }
-    #videoList {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .video-item {
-      background: #1e1e1e;
-      padding: 10px;
-      border-radius: 8px;
-      width: calc(33% - 10px);
-      cursor: pointer;
-      text-align: center;
-      transition: background 0.2s;
-    }
-    .video-item:hover {
-      background: #333;
-    }
-    .video-item img {
-      width: 100%;
-      border-radius: 6px;
-      margin-bottom: 5px;
-    }
-    #nowPlayingBar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #181818;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 10px 20px;
-      border-top: 1px solid #333;
-      z-index: 1000;
-    }
-    #nowPlayingBar img {
-      width: 60px;
-      height: 60px;
-      border-radius: 6px;
-    }
-    #nowPlayingInfo {
-      flex: 1;
-      font-weight: bold;
-    }
-    #youtubePlayer {
-      display: block;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 900px;
-      aspect-ratio: 16/9;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WinTube Music</title>
+<style>
+body {
+margin: 0;
+font-family: Segoe UI, sans-serif;
+background: #121212;
+color: #fff;
+}
+.page {
+max-width: 900px;
+margin: 40px auto 140px;
+padding: 20px;
+}
+#list {
+display: flex;
+flex-wrap: wrap;
+gap: 15px;
+}
+.item {
+background: #1e1e1e;
+padding: 10px;
+border-radius: 8px;
+width: calc(33% - 10px);
+cursor: pointer;
+text-align: center;
+transition: background 0.2s;
+}
+.item:hover {
+background: #333;
+}
+.item img {
+width: 100%;
+border-radius: 6px;
+margin-bottom: 5px;
+}
+#bar {
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: #181818;
+display: flex;
+align-items: center;
+gap: 15px;
+padding: 10px 20px;
+border-top: 1px solid #333;
+z-index: 1000;
+}
+#bar img {
+width: 60px;
+height: 60px;
+border-radius: 6px;
+}
+#info {
+flex: 1;
+font-weight: bold;
+}
+#player {
+display: block;
+border-radius: 8px;
+width: 100%;
+max-width: 900px;
+aspect-ratio: 16/9;
+margin-top: 20px;
+}
+</style>
 </head>
 <body>
-
-  <div class="page-content">
-    <div id="videoList"></div>
-    <iframe
-      id="youtubePlayer"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    ></iframe>
-  </div>
-
-  <div id="nowPlayingBar">
-    <img id="nowPlayingArt" src="" alt="" style="display:none;">
-    <div id="nowPlayingInfo">No video playing</div>
-  </div>
-
-  <script>
-    // list of YouTube video IDs
-    const videos = [
-      "hfJnx0my1B0",
-      "Ml_eZPDEEms",
-      "psKV_D6Tunk",
-      "-85yab-4syM",
-      "gzrlrvxKf-U",
-      "Xq3XBwu5v_E",
-      "yMYTG4C-JnA",
-      "RRGWDQORf-w",
-      "WShUujfh27Y",
-      "PnVx7XH8GOk",
-      "SID_ikfX8QI"
-    ];
-
-    const videoList = document.getElementById("videoList");
-    const youtubePlayer = document.getElementById("youtubePlayer");
-    const nowPlayingTitleEl = document.getElementById("nowPlayingInfo");
-    const nowPlayingArt = document.getElementById("nowPlayingArt");
-
-    // for each video id, fetch metadata via oEmbed, then build tile
-    videos.forEach(id => {
-      const url = `https://www.youtube.com/watch?v=${id}`;
-      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-
-      fetch(oembedUrl)
-        .then(res => {
-          if (!res.ok) throw new Error("oEmbed failed");
-          return res.json();
-        })
-        .then(meta => {
-          // meta.title, meta.thumbnail_url
-          const div = document.createElement("div");
-          div.className = "video-item";
-          div.innerHTML = `
-            <img src="${meta.thumbnail_url}">
-            <div style="font-size: 14px;">${meta.title}</div>
-          `;
-          div.onclick = () => playVideo(id, meta.thumbnail_url, meta.title);
-          videoList.appendChild(div);
-        })
-        .catch(err => {
-          console.error("Could not fetch metadata for video", id, err);
-        });
-    });
-
-    function playVideo(id, thumbnail, title) {
-      youtubePlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-      nowPlayingTitleEl.textContent = title;
-      nowPlayingArt.src = thumbnail;
-      nowPlayingArt.style.display = "block";
-    }
-  </script>
-
-</body>
-</html>
