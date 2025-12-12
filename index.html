@@ -3,71 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>WinTube Music</title>
+<title>WinTube Music Player</title>
 <style>
-body {
-margin: 0;
-font-family: Segoe UI, sans-serif;
-background: #121212;
-color: #fff;
-}
-.page {
-max-width: 900px;
-margin: 40px auto 140px;
-padding: 20px;
-}
-#list {
-display: flex;
-flex-wrap: wrap;
-gap: 15px;
-}
-.item {
-background: #1e1e1e;
-padding: 10px;
-border-radius: 8px;
-width: calc(33% - 10px);
-cursor: pointer;
-text-align: center;
-transition: background 0.2s;
-}
-.item:hover {
-background: #333;
-}
-.item img {
-width: 100%;
-border-radius: 6px;
-margin-bottom: 5px;
-}
-#bar {
-position: fixed;
-bottom: 0;
-left: 0;
-width: 100%;
-background: #181818;
-display: flex;
-align-items: center;
-gap: 15px;
-padding: 10px 20px;
-border-top: 1px solid #333;
-z-index: 1000;
-}
-#bar img {
-width: 60px;
-height: 60px;
-border-radius: 6px;
-}
-#info {
-flex: 1;
-font-weight: bold;
-}
-#player {
-display: block;
-border-radius: 8px;
-width: 100%;
-max-width: 900px;
-aspect-ratio: 16/9;
-margin-top: 20px;
-}
+body { margin:0; font-family:"Segoe UI",sans-serif; background:#121212; color:#fff; }
+.page { max-width:900px; margin:50px auto 150px; padding:20px; }
+#videoList { display:flex; flex-wrap:wrap; gap:15px; }
+.video-item { background:#1e1e1e; padding:10px; border-radius:8px; width:calc(33% - 10px); cursor:pointer; text-align:center; transition:background 0.2s; }
+.video-item:hover { background:#333; }
+.video-item img { width:100%; border-radius:6px; margin-bottom:5px; }
+#nowPlayingBar { position:fixed; bottom:0; left:0; width:100%; background:#181818; display:flex; align-items:center; gap:15px; padding:10px 20px; border-top:1px solid #333; z-index:1000; }
+#nowPlayingBar img { width:60px; height:60px; border-radius:6px; }
+#nowPlayingInfo { flex:1; font-weight:bold; }
+#youtubePlayer { display:block; border-radius:8px; width:100%; max-width:900px; aspect-ratio:16/9; margin-top:20px; }
+#controls { margin-top:10px; display:flex; gap:10px; }
+button { padding:8px 15px; border:none; border-radius:6px; cursor:pointer; background:#fff; color:#000; font-weight:bold; }
 </style>
 </head>
 <body>
+
+<div class="page">
+  <div id="videoList"></div>
+  <iframe id="youtubePlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <div id="controls">
+    <button onclick="prevVideo()">Prev</button>
+    <button onclick="nextVideo()">Next</button>
+  </div>
+</div>
+
+<div id="nowPlayingBar">
+  <img id="nowPlayingArt" src="" style="display:none;">
+  <div id="nowPlayingInfo">No video playing</div>
+</div>
+
+<script>
+const videos = [
+"Hioe-3sihj4","6KPeQzxNpFE","U91PEIutLHE","KzL4HFbqJjA","--yN8J0GqCY","i2Y3qNtMkNU",
+"0E680Lb8aOk","KbEW-MTpI24","AojPyqhmYVA","Uz8fqcsKwwo","1N3i7CeiqA0","tFRyK5-SqDM",
+"IHng28QO_R4","xnzvg3yjfIE","4d7OIs0ravQ","EP7EmvFqlFU","zET5IjvR6m8","RZgn60POzkY",
+"e-AQ7jU2i_o","IIag8QqdPow","D3-vBBQKOYU","2QlYKKiT4Js","RZgn60POzkY","xycKCnWeG7w",
+"iW6Mko_nHtI","aqTdDFvubPM","RaRFYkClYRA","f_rxNWVMHH4","J0IPFrWprSU","RHrI_Jv1ckw",
+"KOn9PHG2xjw","C5aV-dlKiYI","hTd_sDBz5Yk","wQ0LB6VIOv0","1VEu0hS9Kxk","ldPJIHvvk0o",
+"xBXeOW2CBOc","LfewX9Im5Y4","lTU-pyQ_anQ","jImWWkMPGow","SID_ikfX8QI","BOCz5L3BagI"
+];
+
+const videoList = document.getElementById("videoList");
+const youtubePlayer = document.getElementById("youtubePlayer");
+const nowPlayingTitleEl = document.getElementById("nowPlayingInfo");
+const nowPlayingArt = document.getElementById("nowPlayingArt");
+let currentIndex = 0;
+
+function loadVideo(index) {
+  const id = videos[index];
+  const url = `https://www.youtube.com/watch?v=${id}`;
+  const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+  fetch(oembedUrl)
+    .then(res => res.json())
+    .then(meta => {
+      youtubePlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+      nowPlayingTitleEl.textContent = meta.title;
+      nowPlayingArt.src = meta.thumbnail_url;
+      nowPlayingArt.style.display = "block";
+    })
+    .catch(() => {});
+}
+
+function nextVideo() { currentIndex = (currentIndex + 1) % videos.length; loadVideo(currentIndex); }
+function prevVideo() { currentIndex = (currentIndex - 1 + videos.length) % videos.length; loadVideo(currentIndex); }
+
+videos.forEach((id,index)=>{
+  const url = `https://www.youtube.com/watch?v=${id}`;
+  const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+  fetch(oembedUrl).then(res=>res.json()).then(meta=>{
+    const div=document.createElement("div");
+    div.className="video-item";
+    div.innerHTML=`<img src="${meta.thumbnail_url}"><div style="font-size:14px;">${meta.title}</div>`;
+    div.onclick=()=>{ currentIndex=index; loadVideo(currentIndex); };
+    videoList.appendChild(div);
+  }).catch(()=>{});
+});
+
+window.onload = ()=>{ loadVideo(currentIndex); };
+</script>
+
+</body>
+</html>
