@@ -52,38 +52,6 @@ body {
   line-height:1.2;
 }
 
-#nowPlayingBar {
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:rgba(24,24,24,0.95);
-  backdrop-filter:blur(8px);
-  display:flex;
-  align-items:center;
-  gap:15px;
-  padding:12px 20px;
-  border-top:1px solid #333;
-  z-index:1000;
-  transition: all 0.3s;
-}
-
-#nowPlayingBar img {
-  width:60px;
-  height:60px;
-  border-radius:10px;
-  object-fit:cover;
-  display:block;
-}
-
-#nowPlayingInfo {
-  flex:1;
-  font-weight:bold;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
 #youtubePlayer {
   display:block;
   border-radius:12px;
@@ -118,6 +86,91 @@ button:hover {
   transform:scale(1.05);
 }
 
+/* Now Playing Bar */
+#nowPlayingBar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(24,24,24,0.95);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:12px 20px;
+  border-top:1px solid #333;
+  z-index:1000;
+  transition: all 0.3s;
+  flex-direction:column;
+}
+
+#nowPlayingHeader {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+}
+
+#nowPlayingHeader img {
+  width:50px;
+  height:50px;
+  border-radius:10px;
+  object-fit:cover;
+}
+
+#nowPlayingInfo {
+  flex:1;
+  margin-left:15px;
+  font-weight:bold;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#playerControls {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  margin-top:10px;
+  width:100%;
+}
+
+#playerControls button {
+  background:#fff;
+  color:#000;
+}
+
+#progressContainer {
+  width:90%;
+  height:5px;
+  background:#333;
+  border-radius:3px;
+  margin:10px 0;
+  cursor:pointer;
+  position:relative;
+}
+
+#progressBar {
+  width:0%;
+  height:100%;
+  background:#1db954;
+  border-radius:3px;
+  transition:width 0.2s;
+}
+
+/* Collapsed */
+#nowPlayingBar.collapsed {
+  height:70px;
+  padding:10px 20px;
+}
+
+#nowPlayingBar.collapsed #playerControls,
+#nowPlayingBar.collapsed #progressContainer {
+  display:none;
+}
+
 @media(max-width:800px){
   .video-item { width:calc(50% - 7.5px); }
 }
@@ -140,8 +193,19 @@ button:hover {
 </div>
 
 <div id="nowPlayingBar">
-  <img id="nowPlayingArt" src="" style="display:none;">
-  <div id="nowPlayingInfo">No video playing</div>
+  <div id="nowPlayingHeader" onclick="toggleNowPlaying()">
+    <img id="nowPlayingArt" src="" style="display:none;">
+    <div id="nowPlayingInfo">No video playing</div>
+    <div style="margin-left:auto;font-size:20px;">&#9650;</div>
+  </div>
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+  <div id="playerControls">
+    <button onclick="prevVideo()">⏮️</button>
+    <button id="playPauseBtn" onclick="togglePlay()">▶️</button>
+    <button onclick="nextVideo()">⏭️</button>
+  </div>
 </div>
 
 <script>
@@ -159,7 +223,10 @@ const videoList = document.getElementById("videoList");
 const youtubePlayer = document.getElementById("youtubePlayer");
 const nowPlayingTitleEl = document.getElementById("nowPlayingInfo");
 const nowPlayingArt = document.getElementById("nowPlayingArt");
+const nowPlayingBar = document.getElementById("nowPlayingBar");
+const playPauseBtn = document.getElementById("playPauseBtn");
 let currentIndex = 0;
+let playing = true;
 
 function loadVideo(index) {
   const id = videos[index];
@@ -172,12 +239,24 @@ function loadVideo(index) {
       nowPlayingTitleEl.textContent = meta.title;
       nowPlayingArt.src = meta.thumbnail_url;
       nowPlayingArt.style.display = "block";
+      playing = true;
+      playPauseBtn.textContent = "⏸️";
     })
     .catch(() => {});
 }
 
 function nextVideo() { currentIndex = (currentIndex + 1) % videos.length; loadVideo(currentIndex); }
 function prevVideo() { currentIndex = (currentIndex - 1 + videos.length) % videos.length; loadVideo(currentIndex); }
+
+function togglePlay() {
+  // youtube embed autoplay toggle simulation
+  playing = !playing;
+  playPauseBtn.textContent = playing ? "⏸️" : "▶️";
+}
+
+function toggleNowPlaying() {
+  nowPlayingBar.classList.toggle("collapsed");
+}
 
 videos.forEach((id,index)=>{
   const url = `https://www.youtube.com/watch?v=${id}`;
