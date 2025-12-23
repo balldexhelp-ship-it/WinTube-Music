@@ -5,18 +5,127 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>WinTube Music Player</title>
 <style>
-body { margin:0; font-family:"Segoe UI",sans-serif; background:#121212; color:#fff; }
-.page { max-width:900px; margin:50px auto 150px; padding:20px; }
-#videoList { display:flex; flex-wrap:wrap; gap:15px; }
-.video-item { background:#1e1e1e; padding:10px; border-radius:8px; width:calc(25% - 11.25px); cursor:pointer; text-align:center; transition:background 0.2s; }
-.video-item:hover { background:#333; }
-.video-item img { width:100%; border-radius:6px; margin-bottom:5px; }
-#nowPlayingBar { position:fixed; bottom:0; left:0; width:100%; background:#181818; display:flex; align-items:center; gap:15px; padding:10px 20px; border-top:1px solid #333; z-index:1000; }
-#nowPlayingBar img { width:60px; height:60px; border-radius:6px; }
-#nowPlayingInfo { flex:1; font-weight:bold; }
-#youtubePlayer { display:block; border-radius:8px; width:100%; max-width:900px; aspect-ratio:16/9; margin-top:20px; }
-#controls { margin-top:10px; display:flex; gap:10px; }
-button { padding:8px 15px; border:none; border-radius:6px; cursor:pointer; background:#fff; color:#000; font-weight:bold; }
+body {
+  margin:0;
+  font-family:"Segoe UI",sans-serif;
+  background:#121212;
+  color:#fff;
+}
+
+.page {
+  max-width:900px;
+  margin:50px auto 150px;
+  padding:20px;
+}
+
+#videoList {
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.video-item {
+  background:#1e1e1e;
+  padding:10px;
+  border-radius:12px;
+  width:calc(25% - 11.25px);
+  cursor:pointer;
+  text-align:center;
+  transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.video-item:hover {
+  background:#2a2a2a;
+  transform:translateY(-5px) scale(1.02);
+  box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+.video-item img {
+  width:100%;
+  border-radius:10px;
+  margin-bottom:8px;
+  transition: transform 0.3s;
+}
+
+.video-item div {
+  font-size:14px;
+  line-height:1.2;
+}
+
+#nowPlayingBar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(24,24,24,0.95);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:12px 20px;
+  border-top:1px solid #333;
+  z-index:1000;
+  transition: all 0.3s;
+}
+
+#nowPlayingBar img {
+  width:60px;
+  height:60px;
+  border-radius:10px;
+  object-fit:cover;
+  display:block;
+}
+
+#nowPlayingInfo {
+  flex:1;
+  font-weight:bold;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#youtubePlayer {
+  display:block;
+  border-radius:12px;
+  width:100%;
+  max-width:900px;
+  aspect-ratio:16/9;
+  margin-top:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
+  transition: all 0.3s;
+}
+
+#controls {
+  margin-top:15px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+
+button {
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  transition:all 0.2s;
+}
+
+button:hover {
+  background:#f0f0f0;
+  transform:scale(1.05);
+}
+
+@media(max-width:800px){
+  .video-item { width:calc(50% - 7.5px); }
+}
+
+@media(max-width:500px){
+  .video-item { width:100%; }
+  #controls { flex-direction:column; }
+}
 </style>
 </head>
 <body>
@@ -76,7 +185,7 @@ videos.forEach((id,index)=>{
   fetch(oembedUrl).then(res=>res.json()).then(meta=>{
     const div=document.createElement("div");
     div.className="video-item";
-    div.innerHTML=`<img src="${meta.thumbnail_url}"><div style="font-size:14px;">${meta.title}</div>`;
+    div.innerHTML=`<img src="${meta.thumbnail_url}"><div>${meta.title}</div>`;
     div.onclick=()=>{ currentIndex=index; loadVideo(currentIndex); };
     videoList.appendChild(div);
   }).catch(()=>{});
